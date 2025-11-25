@@ -1,8 +1,7 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
+  Column
 } from 'typeorm';
 
 @Entity('commande')

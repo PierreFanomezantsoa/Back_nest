@@ -1,23 +1,20 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Admin } from './entities/Admin.entity';
 import { AdminService } from './services/admin.service';
 import { AdminController } from './controllers/admin.controller';
-import { JwtModule } from '@nestjs/jwt';
-
+import { CommandeGateway } from './gateway/commande.gateway';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Admin]),
-
     JwtModule.register({
-      global: true,
-      secret: 'SECRET_KEY_123',       // mets ta clé dans .env normalement
-      signOptions: { expiresIn: '1d' },
+      secret: 'SECRET_ADMIN', // change à ton goût
+      signOptions: { expiresIn: '7d' },
     }),
   ],
+  providers: [AdminService, CommandeGateway],
   controllers: [AdminController],
-  providers: [AdminService],
-  exports: [AdminService],
 })
 export class AdminModule {}

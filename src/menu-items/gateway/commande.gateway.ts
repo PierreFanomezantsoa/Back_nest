@@ -19,16 +19,18 @@ export class CommandeGateway implements OnGatewayConnection, OnGatewayDisconnect
   constructor(private readonly commandeService: CommandeService) {}
 
   afterInit() {
-    // Injecter le serveur socket.io dans le service
     this.commandeService.setSocketServer(this.server);
     console.log('📡 Socket.io initialisé pour commandes');
   }
 
   handleConnection(client: Socket) {
-    console.log('🟢 Client connecté:', client.id);
+    const userId = client.handshake.auth.userId as string;
+    console.log(`🟢 Client connecté: userId=${userId}, socketId=${client.id}`);
+    this.commandeService.registerSocket(userId, client);
   }
 
   handleDisconnect(client: Socket) {
-    console.log('🔴 Client déconnecté:', client.id);
+    console.log(`🔴 Client déconnecté: socketId=${client.id}`);
+    this.commandeService.unregisterSocket(client.id);
   }
 }

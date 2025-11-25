@@ -1,40 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Admin } from './../entities/Admin.entity';
-import { CreateAdminDto } from '../dto/create-admin.dto';
-import { UpdateAdminDto } from './../dto/update-admin.dto';
+import * as bcrypt from 'bcryptjs';
+import { Admin } from '../entities/Admin.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(Admin)
-    private readonly adminRepo: Repository<Admin>,
+    private repo: Repository<Admin>,
+    private jwtService: JwtService,
   ) {}
 
-  findAll() {
-    return this.adminRepo.find();
+  async register(data: any) {
+    const hashed = await bcrypt.hash(data.password, 10);
+
+    const admin = this.repo.create({
+      ...data,
+      password: hashed,
+    });
+
+    return this.repo.save(admin);
   }
 
-  async findOne(id: number) {
-    const item = await this.adminRepo.findOne({ where: { id } });
-    if (!item) throw new NotFoundException('Admin not found');
-    return item;
-  }
+  async login(email: string, password: string) {
+    const admin = await this.repo.findOne({ where: { email } });
 
-  create(dto: CreateAdminDto) {
-    const item = this.adminRepo.create(dto);
-    return this.adminRepo.save(item);
-  }
+    if (!admin) throw new UnauthorizedException('Email incorrect');
 
-  async update(id: number, dto: UpdateAdminDto) {
-    await this.findOne(id);
-    await this.adminRepo.update(id, dto);
-    return this.findOne(id);
-  }
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) throw new UnauthorizedException('Mot de passe incorrect');
 
-  async remove(id: number) {
-    const item = await this.findOne(id);
-    return this.adminRepo.remove(item);
+    const token = await this.jwtService.signAsync({ id: admin.id, email });
+
+    return { token, admin };
   }
 }

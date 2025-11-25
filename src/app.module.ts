@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MenuItemModule } from './menu-items/menu-item.module';
 import { CommandeModule } from './menu-items/commande.module';
 import { AdminModule } from './menu-items/admin.module';
+import {SocketModule} from "./menu-items/socket.module";
 
 @Module({
   imports: [
@@ -14,11 +15,12 @@ import { AdminModule } from './menu-items/admin.module';
       password: '0701',
       database: 'kiosque',
       autoLoadEntities: true,
-      synchronize: true, // ⚠️ désactiver en production
+      synchronize: true, 
     }),
     MenuItemModule,
     CommandeModule,
-    AdminModule
+    AdminModule,
+    SocketModule
   ],
 })
 export class AppModule {}

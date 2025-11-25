@@ -15,7 +15,7 @@ export class Admin {
   email: string;
 
   @Column({ type: 'varchar', length: 200 })
-  password: string; // correction
+  password: string;
 
   @Column({ type: 'varchar', length: 50 })
   adresse: string;
