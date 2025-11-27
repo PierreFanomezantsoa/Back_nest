@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
@@ -7,6 +8,7 @@ import { MenuItemModule } from './menu-items/menu-item.module';
 import { CommandeModule } from './menu-items/commande.module';
 import { AdminModule } from './menu-items/admin.module';
 import { SocketModule } from './menu-items/socket.module';
+import { PublicationModule } from './menu-items/publication.module';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { SocketModule } from './menu-items/socket.module';
     CommandeModule,
     AdminModule,
     SocketModule,
+    PublicationModule,
   ],
 })
 export class AppModule {}
