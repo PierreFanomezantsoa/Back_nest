@@ -19,19 +19,19 @@ export class PublicationGateway implements OnGatewayConnection {
     console.log('Client connected to Publications Gateway');
   }
 
-  sendCreate(publication: Publication) {
-    this.server.emit('publication_created', publication);
-  }
+  sendCreate(publication: Publication | { image: string | null; [key: string]: any }) {
+  this.server.emit('publication_created', publication);
+}
 
-  sendUpdate(publication: Publication) {
-    this.server.emit('publication_updated', publication);
-  }
+sendUpdate(publication: Publication | { image: string | null; [key: string]: any }) {
+  this.server.emit('publication_updated', publication);
+}
 
-  sendDelete(id: number) {
-    this.server.emit('publication_deleted', { id });
-  }
+sendList(list: (Publication | { image: string | null; [key: string]: any })[]) {
+  this.server.emit('publication_list', list);
+}
 
-  sendList(list: Publication[]) {
-    this.server.emit('publication_list', list);
-  }
+sendDelete(id: number) {
+  this.server.emit('publication_deleted', { id });
+}
 }

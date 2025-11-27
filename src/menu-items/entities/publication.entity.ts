@@ -18,5 +18,5 @@ export class Publication {
   prixPromo: number;
 
   @Column({ length: 200 })
-  image: string;
+  image: string; // ✔ obligatoire
 }

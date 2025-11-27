@@ -1,23 +1,22 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePublicationDto {
   @IsOptional()
   @IsString()
   nom?: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   description: string;
 
   @IsOptional()
   @IsNumber()
   prix?: number;
 
-  @IsNotEmpty()
   @IsNumber()
   prixPromo: number;
 
-  @IsNotEmpty()
+  @IsOptional() // 👈 image sera fournie par Multer
   @IsString()
-  image: string;
+  image?: string;
 }
