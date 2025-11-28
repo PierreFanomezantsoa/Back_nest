@@ -6,7 +6,7 @@ import { CreatePublicationDto } from '../dto/create-publication.dto';
 import { UpdatePublicationDto } from '../dto/update-publication.dto';
 import { PublicationGateway } from '../gateway/publication.gateway';
 
-const BASE_URL = 'http://192.168.1.133:3000/uploads/publications/';
+const BASE_URL = 'http://192.168.137.118:3000/uploads/publications/';
 
 @Injectable()
 export class PublicationService {
