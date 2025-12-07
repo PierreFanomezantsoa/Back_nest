@@ -2,9 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Param,
-  Patch,
   Delete,
   UploadedFile,
   UseInterceptors,
@@ -50,7 +50,8 @@ export class PublicationController {
     return this.service.findOne(+id);
   }
 
-  @Patch(':id')
+  // ==================== PUT pour modification complète ====================
+  @Put(':id')
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -62,12 +63,13 @@ export class PublicationController {
       }),
     }),
   )
-  update(
+  async replace(
     @Param('id') id: string,
     @Body() dto: UpdatePublicationDto,
     @UploadedFile() file?: any,
   ) {
-    return this.service.update(+id, dto, file);
+    // Si file existe, on envoie avec DTO, sinon seulement DTO
+    return await this.service.update(+id, dto, file);
   }
 
   @Delete(':id')

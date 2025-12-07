@@ -1,20 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Server, Socket } from 'socket.io';
 import { Repository, MoreThan } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Commande } from '../entities/commande.entity';
 import { CreateCommandeDto } from '../dto/create-commande.dto';
 import { UpdateCommandeDto } from '../dto/update-commande.dto';
-import { Socket, Server } from 'socket.io';
 
 @Injectable()
 export class CommandeService {
-  private socketServer: Server;
-  private sockets: Map<string, Socket> = new Map(); // userId => socket
+
+  // ✔️ Correction : on autorise null
+  private socketServer: Server | null = null;
+  private sockets = new Map<string, Socket>();
 
   constructor(
     @InjectRepository(Commande)
-    private readonly commandeRepository: Repository<Commande>,
+    private readonly repo: Repository<Commande>,
   ) {}
+
+  /* ================================================================
+      SOCKET.IO
+  ================================================================= */
 
   setSocketServer(server: Server) {
     this.socketServer = server;
@@ -33,51 +39,72 @@ export class CommandeService {
     }
   }
 
-  emitNewCommande(data: any) {
-    this.sockets.forEach((socket) => socket.emit('commande:new', data));
+  // ✔️ broadcast sécurisé à tous les clients
+  private broadcast(event: string, payload: any) {
+    if (this.socketServer) {
+      this.socketServer.emit(event, payload);
+    }
   }
 
-  emitUpdateCommande(data: any) {
-    this.sockets.forEach((socket) => socket.emit('commande:update', data));
-  }
+  /* ================================================================
+      LOGIQUE METIER
+  ================================================================= */
 
-  emitDeleteCommande(id: number) {
-    this.sockets.forEach((socket) => socket.emit('commande:delete', id));
-  }
+  async create(dto: CreateCommandeDto) {
+    const c = this.repo.create(dto);
+    const saved = await this.repo.save(c);
 
-  async create(dto: CreateCommandeDto): Promise<Commande> {
-    const commande = this.commandeRepository.create(dto);
-    const saved = await this.commandeRepository.save(commande);
-    this.emitNewCommande(saved);
+    // envoyer événement temps réel
+    this.broadcast('commande:new', saved);
+
     return saved;
   }
 
-  async findAll(): Promise<Commande[]> {
-    return this.commandeRepository.find({ order: { created_at: 'DESC' } });
+  async findAll() {
+    return this.repo.find({
+      order: { created_at: 'DESC' },
+    });
   }
 
-  async findOne(id: number): Promise<Commande> {
-    const commande = await this.commandeRepository.findOne({ where: { id } });
-    if (!commande) throw new NotFoundException(`Commande ${id} introuvable`);
-    return commande;
+  async findOne(id: number) {
+    const item = await this.repo.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Commande introuvable');
+    return item;
   }
 
-  async update(id: number, dto: UpdateCommandeDto): Promise<Commande> {
-    const existing = await this.findOne(id);
-    const updated = { ...existing, ...dto };
-    await this.commandeRepository.save(updated);
-    this.emitUpdateCommande(updated);
+  async update(id: number, dto: UpdateCommandeDto) {
+    const cmd = await this.findOne(id);
+    Object.assign(cmd, dto);
+
+    const updated = await this.repo.save(cmd);
+
+    this.broadcast('commande:update', updated);
+
     return updated;
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.commandeRepository.delete(id);
-    if (result.affected === 0) throw new NotFoundException(`Commande ${id} introuvable`);
-    this.emitDeleteCommande(id);
+  async remove(id: number) {
+    const result = await this.repo.delete(id);
+    if (result.affected === 0)
+      throw new NotFoundException('Commande introuvable');
+
+    this.broadcast('commande:delete', id);
+
+    return { success: true };
   }
 
+  /* ================================================================
+      ✔️ MÉTHODE QUI MANQUAIT — FIX ERREUR TS2339
+  ================================================================= */
+
   async countRecent(): Promise<number> {
-    const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
-    return this.commandeRepository.count({ where: { created_at: MoreThan(threeMinutesAgo) } });
+    const since = new Date();
+    since.setHours(since.getHours() - 1); // commandes de la dernière heure
+
+    return this.repo.count({
+      where: {
+        created_at: MoreThan(since),
+      },
+    });
   }
 }

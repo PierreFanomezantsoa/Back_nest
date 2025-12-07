@@ -9,6 +9,10 @@ export class CreatePublicationDto {
   @IsNotEmpty()
   description: string;
 
+  @IsString()
+  @IsNotEmpty()
+  categorie: string;
+
   @IsOptional()
   @IsNumber()
   prix?: number;

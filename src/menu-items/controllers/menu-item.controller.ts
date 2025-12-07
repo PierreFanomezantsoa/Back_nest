@@ -9,7 +9,7 @@ import { UpdateMenuItemDto } from '../dto/update-menu-item.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
-const BACKEND_URL = 'http://192.168.137.118:3000'; // Soloina IP-nao
+const BACKEND_URL = 'http://192.168.137.118:3000'; 
 
 @Controller('menus')
 export class MenuItemController {

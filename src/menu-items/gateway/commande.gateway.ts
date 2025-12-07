@@ -1,31 +1,24 @@
-import {
-  WebSocketGateway,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { CommandeService } from '../services/commande.service';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+  cors: { origin: '*' },
+  transports: ['websocket', 'polling'],
 })
-export class CommandeGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
+export class CommandeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
 
   constructor(private readonly commandeService: CommandeService) {}
 
   afterInit() {
     this.commandeService.setSocketServer(this.server);
-    console.log('📡 Socket.io initialisé pour commandes');
+    console.log('📡 CommandeGateway initialisé');
   }
 
   handleConnection(client: Socket) {
-    const userId = client.handshake.auth.userId as string;
-    console.log(`🟢 Client connecté: userId=${userId}, socketId=${client.id}`);
+    const userId = client.handshake.auth?.userId || 'unknown';
+    console.log(`🟢 Client connecté: socketId=${client.id} userId=${userId}`);
     this.commandeService.registerSocket(userId, client);
   }
 

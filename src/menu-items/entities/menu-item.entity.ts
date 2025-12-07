@@ -11,6 +11,9 @@ export class MenuItem {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({length:100})
+  categorie: string;
+
   @Column({ type: 'int' })
   price: number;
 

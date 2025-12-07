@@ -8,10 +8,13 @@ export class CreateMenuItemDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+  @IsString()
+  @IsNotEmpty()
+  categorie: string;
 
   @IsInt()
   price: number;
-
+  
   @IsOptional()
   @IsString()
   image?: string;

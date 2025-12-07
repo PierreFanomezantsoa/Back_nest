@@ -31,11 +31,4 @@ export class CommandeController {
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
-
-  // Endpoint pour compter les commandes récentes
-  @Get('stats/recent-count')
-  async recentCount() {
-    const recent = await this.service.countRecent();
-    return { recent };
-  }
 }

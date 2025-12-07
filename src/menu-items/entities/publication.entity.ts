@@ -11,6 +11,9 @@ export class Publication {
   @Column({ length: 200 })
   description: string;
 
+  @Column({length:100, nullable:true})
+  categorie: string;
+
   @Column({ nullable: true })
   prix: number;
 
